@@ -5,7 +5,7 @@ import torch
 
 class UserVectorGNN(torch.nn.Module):
     def __init__(self,input_size,output_size):
-        super.__init__()
+        super().__init__()
         self.conv1 = GCNConv(input_size,input_size*2)
         self.conv2 = GCNConv(input_size*2,input_size*4)
         self.conv3 = GCNConv(input_size*4,input_size*8)
@@ -29,12 +29,12 @@ class UserVectorGNN(torch.nn.Module):
         return out
     
 class VariationalGCNEncoder(torch.nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, input_size, output_size):
         super().__init__()
-        self.conv1 = GCNConv(in_channels, 2 * out_channels)
-        self.conv_mu = GCNConv(2 * out_channels, out_channels)
-        self.conv_logstd = GCNConv(2 * out_channels, out_channels)
+        self.conv1 = GCNConv(input_size, 2 * output_size)
+        self.conv_mu = GCNConv(2 * output_size, output_size)
+        self.conv_logstd = GCNConv(2 * output_size, output_size)
 
-    def forward(self, x, edge_index):
-        x = self.conv1(x, edge_index).relu()
-        return self.conv_mu(x, edge_index), self.conv_logstd(x, edge_index)
+    def forward(self, x, edge_index,edge_weight):
+        x = self.conv1(x, edge_index,edge_weight).relu()
+        return self.conv_mu(x, edge_index,edge_weight), self.conv_logstd(x, edge_index,edge_weight)
