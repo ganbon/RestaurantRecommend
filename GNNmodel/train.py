@@ -1,5 +1,5 @@
 from dataset import ShopGraphDataset
-from gnn import UserVectorGNN,VariationalGCNEncoder
+from gnn import VariationalGCNEncoder
 from torch_geometric.nn import VGAE
 import torch
 import numpy as np
@@ -21,7 +21,7 @@ shop_data_list = [Shop(shop_data=shop) for shop in shop_data]
 for i,s in enumerate(shop_data_list):
     if len(np.ravel(s.shop_vector)) != 2400:
         shop_data_list[i].shop_vector = np.concatenate([s.shop_vector,np.zeros((10-len(s.comment_word),200))])
-epoch = 20
+epoch = 50
 dataset_module = ShopGraphDataset(user_data = user_lunch_data,shop_data_list = shop_data_list,date="昼")
 dataset = dataset_module.load_dataset()
 dataset = dataset
@@ -36,13 +36,13 @@ test_pos_edge_attr = split_dataset.test_pos_edge_attr.double().to(device)
 # exit(1)
 input_size = 2400
 output_size = 16
-model1 = UserVectorGNN(input_size=input_size,output_size=output_size)
+# model1 = UserVectorGNN(input_size=input_size,output_size=output_size)
 # model = model1
 model2 = VGAE(VariationalGCNEncoder(input_size=input_size,output_size=output_size))
 model = model2.double().to(device)
 # loss_function = L1Loss()
 optimizer = AdamW(model.parameters(), lr=0.001)
-for e in tqdm(range(epoch)):
+for e in range(1,epoch+1):
     model.train()
     optimizer.zero_grad()
     z = model.encode(edge_feature, train_data_edge_index,train_data_edge_attr)
