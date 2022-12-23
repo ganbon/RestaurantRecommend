@@ -3,11 +3,11 @@ import React from 'react'
 import {Button,CardActionArea,CardActions} from '@mui/material';
 
 type ResultsPropsType = {
-    url: any;
-    name: any;
-    genre: any;
-    review: any;
-    place: any;
+    url: "";
+    name: "";
+    genre: "";
+    review: 0;
+    place: "";
   }
 
 const Result = (props:ResultsPropsType) => {
