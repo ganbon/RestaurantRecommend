@@ -3,7 +3,7 @@ from torch.nn import Embedding
 from nlptoolsjp.file_system import *
 from nlptoolsjp.norm import clean_text
 import numpy as np
-from torch_geometric.utils import train_test_split_edges
+from torch_geometric.transforms import RandomLinkSplit
 from torch_geometric.data import Data
 import sys
 sys.path.append("..")
@@ -12,7 +12,7 @@ from shop import Shop
 
 class ShopGraphDataset:
     def __init__(self,user_data,shop_data_list,date,vector_size=2400):
-        self.user_name = list(set(user_data.index))
+        self.user_name = list(set(user_data["user"]))
         self.user_data = user_data
         self.date = date
         embeding = Embedding(len(self.user_name),vector_size)
@@ -23,21 +23,24 @@ class ShopGraphDataset:
         self.edge_index = None
     
     def index_edge_create(self):
-        shop_list = []
         edge_attr = []
         src = []
         dst = []
         for u,user in enumerate(self.user_name):
-            user_df = self.user_data[self.user_data.index==user]
+            shop_list = []
+            user_df = self.user_data[self.user_data["user"]==user]
             user_shop = clean_text(user_df["店名"].tolist(),norm_op=False)
+            # user_review = [review - user_df[self.date].mean() for review in user_df[self.date].tolist()]
             user_review = user_df[self.date].tolist()
             for shop,review in zip(user_shop,user_review):
+                if shop in shop_list:
+                    continue
                 try:
                     dst.append(len(self.user_name)+self.shop_name.index(shop))
                     src.append(u)
+                    shop_list.append(shop)
                     edge_attr.append(review)
                 except:
-                    shop_list.append(shop)
                     pass
         edge_list = torch.tensor([src,dst])
         self.edge_attr = torch.tensor(edge_attr)
@@ -57,9 +60,25 @@ if __name__=="__main__":
     user_data = file_load("../csv_data/user/user_lunch_data.csv")
     data = ShopGraphDataset(user_data=user_data,shop_data_list=shop_data_list,date="昼")
     dataset = data.load_dataset()
-    print(dataset.edge_index)
-    split_data = train_test_split_edges(dataset)
-    print(split_data)
+    torch.set_printoptions(edgeitems=4000)
+    # print(negative_sampling(dataset.edge_index,num_nodes=len(dataset.x)))
+    # print(len(negative_sampling(dataset.edge_index,num_nodes=len(dataset.x))[0]))
+    transform = RandomLinkSplit(is_undirected=True, split_labels=True)
+    train_data, val_data, test_data = transform(dataset)
+    print(train_data)
+    print(test_data)
+    print(train_data.edge_attr.double())
+    # print(test_data.pos_edge_label_index)
+    # print(test_data.neg_edge_label_index)
+    # print(len(data.edge_index[0]))
+    # print(len(data.user_name),len(data.shop_name))
+    # print(dataset)
+    # split_data = train_test_split_edges(dataset)
+    # print(split_data)
+    # print(split_data.test_neg_edge_index[:30])
+    # print(split_data.test_pos_edge_index[:30])
+    # print(split_data.test_neg_edge_index.size())
+    # print(split_data.test_pos_edge_index.size())
     # print(dataset.num_node_features)
     # print(dataset.contains_isolated_nodes())
     # print(dataset["x"].size())
