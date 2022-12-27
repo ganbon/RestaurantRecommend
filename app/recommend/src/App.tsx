@@ -2,7 +2,7 @@ import Top from "./components/Top"
 import SaerchPage from "./components/Search"
 import Recommend from "./components/Recommend";
 import './App.css';
-import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
+import { BrowserRouter, Switch, Route } from "react-router-dom";
 
 function App() {
   return (
