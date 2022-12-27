@@ -139,8 +139,13 @@ def user_data(url):
         data_list.append(data)
     return data_list
 
-
-
+def img_data(url):
+    soup = scraping_obj(url)
+    li_tag = soup.find("li",class_="p-main-photos__switch-photo")
+    img_tag = li_tag("img")
+    img_url = img_tag.get("src")
+    time.sleep(10)
+    return img_url
 
 
 if __name__=="__main__":
