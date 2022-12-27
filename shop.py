@@ -148,8 +148,6 @@ class Shop:
 
 
 
-
-
 if __name__=="__main__":
     import torch
     test = Shop(shop_file_path="tablog_data/'99 BABY's CAFE.json")

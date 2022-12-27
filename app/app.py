@@ -1,4 +1,4 @@
-from flask import Flask, request, make_response,jsonify
+from flask import Flask, request, make_response,jsonify,send_file
 from nlptoolsjp.file_system import *
 from flask_cors import CORS
 from system.search import search_shop
@@ -23,8 +23,8 @@ def search_result():
                 "place":shop.shop_data["住所"]} for shop in result]
     return make_response(jsonify(response))
 
-@app.route('/book',methods=['GET','POST'])
-def bookmark(methods=['GET','POST']):
+@app.route('/visited',methods=['GET','POST'])
+def bookmark():
     data = request.get_json()
     user_data = file_load("data/csv/user.csv")
     user_data = pd.concat([user_data,pd.DataFrame(data)])
