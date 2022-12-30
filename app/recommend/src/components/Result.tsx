@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import Rating from '@mui/material/Rating';
 import { Button, CardActionArea, CardActions } from '@mui/material';
 
+
 type ResultsPropsType = {
     url: "";
     name: "";
@@ -42,6 +43,5 @@ const Result = (props:ResultsPropsType) => {
       </Card>
       );
 }
-
 
 export default Result;

@@ -79,7 +79,7 @@ class Shop:
                 df = pd.concat([df,sub_df])
         d = df['word'].value_counts().head(30).index.tolist()
         self.comment_word = d
-
+        
     # 選択した単語ベクトル化
     def word_vector_create(self,wd2vc_file_path="word2vec/word2vec_model/tablog_Skip-gram.model"):
         wd2vc_model = word2vec.Word2Vec.load(wd2vc_file_path)
@@ -151,7 +151,6 @@ class Shop:
             self.word_vector_create()
             self.vector_concat()        
         file_create(self.shop_data,file_name)
-
 
 
 

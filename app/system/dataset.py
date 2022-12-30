@@ -12,7 +12,7 @@ from shop import Shop
 
 class ShopGraphDataset:
     def __init__(self,user_data,shop_data_list,date,vector_size=2400):
-        self.user_name = list(set(user_data.index))
+        self.user_name = list(set(user_data["user"]))
         self.user_data = user_data
         self.date = date
         embeding = Embedding(len(self.user_name),vector_size)
