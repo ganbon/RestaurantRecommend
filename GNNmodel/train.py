@@ -16,15 +16,12 @@ from shop import Shop
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 user_lunch_data = file_load("../csv_data/user/user_lunch_data.csv")
 user_dinner_data = file_load("../csv_data/user/user_dinner_data.csv")
-shop_data = file_load("../shop_data.json")
-shop_data_list = [Shop(shop_data=shop) for shop in shop_data]
-for i,s in enumerate(shop_data_list):
-    if len(np.ravel(s.shop_vector)) != 2400:
-        shop_data_list[i].shop_vector = np.concatenate([s.shop_vector,np.zeros((10-len(s.comment_word),200))])
-epoch = 50
-dataset_module = ShopGraphDataset(user_data = user_lunch_data,shop_data_list = shop_data_list,date="昼")
+shop_data = file_load("../shop_data_v2.json")
+shop_data_list = [Shop(shop_data=shop) for name,shop in shop_data.items()]
+epoch = 100
+dataset_module = ShopGraphDataset(user_data = user_dinner_data,shop_data_list = shop_data_list,date="夜")
 dataset = dataset_module.load_dataset()
-dataset = dataset
+print(dataset)
 split_dataset = train_test_split_edges(dataset)
 edge_feature = dataset.x.to(device)
 train_data_edge_index = split_dataset.train_pos_edge_index.long().to(device)
@@ -35,7 +32,7 @@ test_pos_edge_attr = split_dataset.test_pos_edge_attr.double().to(device)
 # print(edge_feature.dtype,train_data_edge_index.dtype,train_data_edge_attr.dtype,test_pos_edge_index.dtype,test_neg_edge_index.dtype,test_pos_edge_attr.dtype)
 # exit(1)
 input_size = 2400
-output_size = 16
+output_size = 32
 # model1 = UserVectorGNN(input_size=input_size,output_size=output_size)
 # model = model1
 model2 = VGAE(VariationalGCNEncoder(input_size=input_size,output_size=output_size))
@@ -57,4 +54,4 @@ for e in range(1,epoch+1):
         auc,ap = model.test(z,test_pos_edge_index,test_neg_edge_index)
         print(f"epoch:{e} AUC:{auc} AP:{ap} loss:{loss}")
     time.sleep(2)
-torch.save(model, 'vgae.pth')
+torch.save(model,'dinner_vgae.pth')

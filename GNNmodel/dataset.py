@@ -12,7 +12,7 @@ from shop import Shop
 
 class ShopGraphDataset:
     def __init__(self,user_data,shop_data_list,date,vector_size=2400):
-        self.user_name = list(set(user_data.index))
+        self.user_name = list(set(user_data["user"]))
         self.user_data = user_data
         self.date = date
         embeding = Embedding(len(self.user_name),vector_size)
@@ -21,14 +21,13 @@ class ShopGraphDataset:
         shop_x = torch.stack([torch.from_numpy(np.ravel(shop.shop_vector))  for shop in shop_data_list])
         self.x = torch.cat([user_x,shop_x])
         self.edge_index = None
-    
     def index_edge_create(self):
         shop_list = []
         edge_attr = []
         src = []
         dst = []
         for u,user in enumerate(self.user_name):
-            user_df = self.user_data[self.user_data.index==user]
+            user_df = self.user_data[self.user_data["user"]==user]
             user_shop = clean_text(user_df["店名"].tolist(),norm_op=False)
             user_review = user_df[self.date].tolist()
             for shop,review in zip(user_shop,user_review):
@@ -49,15 +48,16 @@ class ShopGraphDataset:
 
 
 if __name__=="__main__":
-    shop_data = file_load("../shop_data.json")
-    shop_data_list = [Shop(shop_data=shop) for shop in shop_data]
+    shop_data = file_load("../shop_data_v2.json")
+    shop_data_list = [Shop(shop_data=shop) for name,shop in shop_data.items()]
     for i,s in enumerate(shop_data_list):
         if len(np.ravel(s.shop_vector)) != 2400:
             shop_data_list[i].shop_vector = np.concatenate([s.shop_vector,np.zeros((10-len(s.comment_word),200))])
     user_data = file_load("../csv_data/user/user_lunch_data.csv")
     data = ShopGraphDataset(user_data=user_data,shop_data_list=shop_data_list,date="昼")
     dataset = data.load_dataset()
-    print(dataset.edge_index)
+    print(dataset)
+    # print(dataset.edge_index)
     split_data = train_test_split_edges(dataset)
     print(split_data)
     # print(dataset.num_node_features)
