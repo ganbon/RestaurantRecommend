@@ -139,13 +139,16 @@ def user_data(url):
         data_list.append(data)
     return data_list
 
-def img_data(url):
+def img_data(url,li_class="p-main-photos__switch-photo"):
     soup = scraping_obj(url)
     li_tag = soup.find("li",class_="p-main-photos__switch-photo")
-    img_tag = li_tag("img")
+    if li_tag is None:
+        li_tag = soup.find("li",class_="rstdtl-top-postphoto__item")
+    img_tag = li_tag.find("img")
     img_url = img_tag.get("src")
+    img = requests.get(img_url, stream=True)
     time.sleep(10)
-    return img_url
+    return img
 
 
 if __name__=="__main__":
