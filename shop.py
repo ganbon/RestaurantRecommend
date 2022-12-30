@@ -129,7 +129,7 @@ class Shop:
     # 店ベクトル作成
     def vector_concat(self):
         genre_vector = np.full((1,200),self.genre_id*0.1)
-        review_vector = np.full((1,200),self.review/5*0.1)
+        review_vector = np.full((1,200),self.review/5*0.5)
         word_vector = np.array([vec for vec in self.comment_word_vector.values()])
         self.shop_vector = np.concatenate([genre_vector,review_vector,word_vector])
         if len(self.comment_word_vector.keys()) < 10:
@@ -150,10 +150,13 @@ class Shop:
 
 if __name__=="__main__":
     import torch
-    test = Shop(shop_file_path="tablog_data/'99 BABY's CAFE.json")
+    text = "珈琲美人 文月"
+    print(clean_text(text,norm_op=False))
+    test = Shop(shop_file_path="tablog_data\珈琲美人 文月.json")
     test.save_json("a.json")
     print(test.comment_word_vector.keys())
     test2 = Shop(shop_file_path="a.json")
     print(torch.from_numpy(np.ravel(test2.shop_vector)))
     print(type(np.ravel(test2.shop_vector)))
+    print(test.shop_data["店名"])
     # print(test2.comment_word_vector)
