@@ -22,7 +22,7 @@ const Result = (props:ResultsPropsType) => {
           <CardMedia
             component="img"
             height="140"
-            image={`${process.env.PUBLIC_URL}/image/''.png`}
+            image={`${process.env.PUBLIC_URL}/image/.png`}
             alt="green iguana"
           />
           <CardContent>
