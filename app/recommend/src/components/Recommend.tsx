@@ -1,8 +1,10 @@
-import Title from "./Title"
+import Header from "./Header"
 import SubTitle from "./SubTitle"
 import Axios from 'axios'
-import Result from "./Result"
 import React, { useState } from 'react'
+import Grid from '@mui/material/Unstable_Grid2';
+import Shopdisplay from "./Shopdisplay"
+import useLocationChange from "./LocationChange";
 
 type ResultsPropsType = {
   url: "";
@@ -16,30 +18,28 @@ const Recommend = () => {
   ]);
   const [dinner, setDinnerResults] = useState<Array<ResultsPropsType>>([
   ]);
-const GNNResult = (e:any) =>{
-    e.preventDefault();
-      Axios.post("http://127.0.0.1:5000/gnn")
-      .then(res => {
-          setLunchResults(res.data.lunch);
-          setDinnerResults(res.data.dinner);
-      })
-}
+  const GNNResult = () =>{
+    Axios.post("http://127.0.0.1:5000/recommend")
+    .then(res => {
+        setLunchResults(res.data.lunch);
+        setDinnerResults(res.data.dinner);
+    })
+  }
+  useLocationChange(() => {
+    GNNResult();
+  })
     return(
-      <div className="Recommend">
-        <Title title="あなたへのおすすめ"/>
+      <>
+        <Header title="あなたへのおすすめ"/>
         <SubTitle title="ランチ"/>
-        {lunch.map((result) => {
-          return(
-        <Result url={result.url} name={result.name} genre={result.genre} review={result.review} place={result.place}/>
-          );
-        })}
+        <Grid container spacing={{ xs: 1, md: 2 }} columns={{ xs: 2, sm: 6, md: 12 }}>
+        <Shopdisplay shoplist={lunch}/>
+        </Grid>
         <SubTitle title="ディナー"/>
-        {dinner.map((result) => {
-          return(
-        <Result url={result.url} name={result.name} genre={result.genre} review={result.review} place={result.place}/>
-          );
-        })}
-    </div>
+        <Grid container spacing={{ xs: 1, md: 2 }} columns={{ xs: 2, sm: 6, md: 12 }}>
+        <Shopdisplay shoplist={dinner}/>
+        </Grid>
+      </>
     )
 }
 

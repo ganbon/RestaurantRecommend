@@ -18,7 +18,7 @@ type ResultsPropsType = {
 
 const Result = (props:ResultsPropsType) => {
     return (
-        <Card sx={{ maxWidth: 345 }}>
+        <Card sx={{ maxWidth: 345 ,m:3}}>
         <CardActionArea href={props.url}>
           <CardMedia
             component="img"
@@ -32,7 +32,7 @@ const Result = (props:ResultsPropsType) => {
             </Typography>
             <Typography variant="body2" color="text.secondary">
               ジャンル：{props.genre}<br/>
-              場所：{props.place}
+              場所：{props.place}<br/>
               <Rating name="read-only" value={props.review} precision={0.25} readOnly />
             </Typography>
           </CardContent>

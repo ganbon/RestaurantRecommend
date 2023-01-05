@@ -1,17 +1,11 @@
-import Title from "./Title"
-import Search from "./Search"
-import React, { useState } from 'react'
-import Button from '@mui/material/Button';
-import { NavLink } from "react-router-dom";
+import Header from "./Header"
+
 
 
 const Top = () =>{
     return (
       <div>
-        <Title title={"グルメコンサルティング"}/>
-        <Button href="/search">検索</Button>
-        <Button href="/new">あなたへのおすすめ</Button>
-        <Button href="/popular">人気のお店</Button>
+        <Header title={"グルメコンサルティング"}/>
       </div>
     );
 }

@@ -1,8 +1,8 @@
-import Title from "./Title"
+import Header from "./Header"
 import Form from "./Form"
-import Result from "./Result"
 import Grid from '@mui/material/Unstable_Grid2';
-// import './App.css';
+import Shopdisplay from "./Shopdisplay"
+import Container from '@mui/material/Container';
 import React, { useState } from 'react'
 import Axios from 'axios'
 
@@ -26,30 +26,28 @@ const SearchPage = () => {
       Axios.post("http://127.0.0.1:5000/search", {sentence:keyword})
       .then(res => {
           setResults(res.data);
+          setTitle(keyword);
       })
-      setTitle(keyword);
-  } 
+    } 
   if(keytitle===""){  
     return (
       <>
-        <Title title="検索"/>
+        <Header title="検索"/>
+        <Container maxWidth="sm">
         <Form setWord={setWord} Search={Search}/>
+        </Container>
     </>
     );
   }
   else{
   return (
     <>
-        <Title title={keytitle+"の検索結果"} />
+        <Header title={keytitle+"の検索結果"} />
+        <Container maxWidth="sm">
         <Form setWord={setWord} Search={Search}/>
-        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-        {results.map((result) => { 
-          return(
-        <Grid>
-        <Result url={result.url} name={result.name} genre={result.genre} review={result.review} place={result.place}/>
-        </Grid>
-          );
-      })}
+        </Container>
+        <Grid container spacing={{ xs: 1, md: 2 }} columns={{ xs: 2, sm: 6, md: 12 }}>
+        <Shopdisplay shoplist={results}/>
       </Grid>
     </>
   );

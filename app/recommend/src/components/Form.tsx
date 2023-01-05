@@ -15,17 +15,17 @@ const Form = (props:FormPropsType) => {
     <form action="/search"> 
         <Paper
       component="form"
-      sx={{ p: '2px 4px', display: 'flex', alignItems:'center', width: 400 }}
+      sx={{ p: '2px 4px', display: 'flex', alignItems:'center', width: 600 ,m:3}}
     >
         <InputBase
         sx={{ ml: 1, flex: 1 }}
         placeholder="例：飲み会　友達"
         onChange={e => props.setWord(e.target.value)}
-        // onKeyPress={e => {
-        //     if (e.key === 'Enter') {
-        //       props.Search;
-        //     }
-        //   }}
+        onKeyPress={e => {
+            if (e.key === 'Enter') {
+              props.Search(e);
+            }
+          }}
       />
        <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
             <IconButton color="primary" aria-label="Search" component="label" onClick={props.Search} sx={{ p: '10px' }}>

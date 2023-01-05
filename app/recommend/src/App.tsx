@@ -9,18 +9,10 @@ function App() {
     <div className="app">
       <BrowserRouter> 
         <Switch>
-          <Route  exact path="/">
-            <Top />
-          </Route>
-          <Route path="/search">
-            <SaerchPage />
-          </Route>
-        <Route path="/new">
-            <Recommend />
-          </Route>
-          <Route path="/popular">
-            <Recommend />
-          </Route>
+          <Route  exact path="/" component={Top}/>
+          <Route path="/search"component={SaerchPage}/>
+        <Route path="/new"component={Recommend}/>
+          <Route path="/popular"component={Top}/>
         </Switch>
       </BrowserRouter>
     </div>

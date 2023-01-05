@@ -4,7 +4,7 @@ type TitleProps = {
   }
 const SubTitle = (props:TitleProps) =>{
     return (
-        <Typography variant="h4" textAlign="center">{props.title}</Typography>
+        <Typography variant="h6" textAlign="center">{props.title}</Typography>
     );
 }
 

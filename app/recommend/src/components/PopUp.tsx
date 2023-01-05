@@ -18,7 +18,7 @@ const PopUp = (props:any) => {
   };
   const Review = (e:any) => {
     e.preventDefault();
-    Axios.post("http://127.0.0.1:5000/search", {name:props.name,lunch:lunchvalue,dinner:dinnervalue})
+    Axios.post("http://127.0.0.1:5000/visited", {name:props.name,lunch:lunchvalue,dinner:dinnervalue})
   }
   return (
     <div>
@@ -26,8 +26,8 @@ const PopUp = (props:any) => {
           ブックマーク
     </Button>
     <Dialog onClose={handleClose} open={open}>
-      <DialogTitle>レビュー</DialogTitle>
-      <SubTitle title="ランチ"/>
+      <DialogTitle sx={{ m: 0, p: 2 }}>レビュー</DialogTitle>
+    
       <Rating
           name="half-rating"
           defaultValue={0}
@@ -37,7 +37,7 @@ const PopUp = (props:any) => {
           setLunchValue(newlunchValue);
           }}
       />
-      <SubTitle title="ディナー"/>
+
       <Rating
           name="half-rating"
           value={dinnervalue}
@@ -49,7 +49,7 @@ const PopUp = (props:any) => {
       />
       <DialogActions>
       <Button onClick={handleClose}>閉じる</Button>
-      <Button onClick={() => {handleClose; Review;}}>決定</Button>
+      <Button onClick={(e) => {handleClose(); Review(e);}}>決定</Button>
       </DialogActions>
     </Dialog>
     </div>
