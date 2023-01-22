@@ -1,32 +1,22 @@
 import pandas as pd
 import numpy as np
 from nlptoolsjp.file_system import *
-from gensim.models import word2vec
 from nlptoolsjp.norm import *
 from nlptoolsjp.morpheme import *
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 class Shop:
-    def __init__(self,shop_file_path=None,shop_data=None):
+    def __init__(self,shop_file_path=None,shop_data=None,wd2vc_model=None):
         if shop_file_path == None:
             self.shop_data = shop_data
         else:
             self.shop_data = file_load(shop_file_path)
         self.genre = self.shop_data["ジャンル"]
         self.review = self.shop_data["評価"]
-        self.comment = self.shop_data["口コミ"]
-        if "word" in self.shop_data.keys():
-            self.comment_word = self.shop_data["word"]
-            self.comment_word_vector = {word:np.array(vector) for word,vector in self.shop_data["comment_word_vector"].items()}
-        else:
-            self.comment_word = None
-            self.comment_word_vector = {}
-        if "shop_vector" in self.shop_data.keys():
-            self.shop_vector = np.array(self.shop_data["shop_vector"])
-        else:
-            self.shop_vector = None
-        self.genre_id = None
+        if "genre_id" in list(self.shop_data.keys()):
+            self.genre_id = self.shop_data["genre_id"]
+        self.wd2vc_model = wd2vc_model
 
     # テキスト正規化
     def shop_text_clean(self):
@@ -36,9 +26,10 @@ class Shop:
 
     # 重要度の高いword選択
     def word_select(self):
+        token = self.wd2vc_model.wv.index_to_key
         speech_list = ["名詞","形容詞","形容動詞"]
-        ban_detail = ["非自立","接尾"]
-        comment_data = clean_text(self.comment)
+        ban_detail = ["非自立","接尾","数","代名詞"]
+        comment_data = self.shop_data["口コミ"]
         comment_data = [comment_data[i].split("。") for i in range(len(comment_data))]
         comment_data = [remove_str(_data) for _data in comment_data]
         for c,sub_com in enumerate(comment_data):
@@ -48,7 +39,7 @@ class Shop:
             for j,com in enumerate(sub_com):
                 if com=="":
                     continue
-                kind, sentence = morpheme(re.sub(r"l*","",com),kind=True,nelogd=True)
+                kind, sentence = morpheme(re.sub(r"l+","",com),kind=True,neologd=True)
                 sub = [kind[se]["endform"] if kind[se]["endform"]!="*" else se for se in sentence]
                 k_dic = {kind[se]["endform"]:kind[se]["speech"] for se in sentence}
                 detailk_dic = {kind[se]["endform"]:kind[se]["detail_speech"][0] for se in sentence}
@@ -63,35 +54,27 @@ class Shop:
             word_dict = {"doc_num":[],"word":[],"kind":[],"detail_kind":[],"vector":[]}
             for i in range(len(dataset)):
                 for w,vec in zip(dataset[i].split(' '),values[i]):
-                    try:
-                        if vec > 0 and kind_dict[w] in speech_list and detail_kind_dict[w] not in ban_detail and w not in word_dict["word"]:
-                            word_dict["doc_num"].append(c+1)
-                            word_dict["word"].append(w)
-                            word_dict["vector"].append(vec)
-                            word_dict["kind"].append(kind_dict[w])
-                            word_dict["detail_kind"].append(detail_kind_dict[w])
-                    except:
+                    if w in token:
+                        try:
+                            if vec > 0 and w in kind_dict.keys() and kind_dict[w] in speech_list and \
+                                detail_kind_dict[w] not in ban_detail and w not in word_dict["word"]: 
+                                word_dict["doc_num"].append(c+1)
+                                word_dict["word"].append(w)
+                                word_dict["vector"].append(vec)
+                                word_dict["kind"].append(kind_dict[w])
+                                word_dict["detail_kind"].append(detail_kind_dict[w])  
+                        except:
+                            print(sub_com)  
+                    else:
                         continue
             if c==0:
-                df = pd.DataFrame(word_dict)
+                df = pd.DataFrame(word_dict,index=word_dict["word"])
             else:
-                sub_df = pd.DataFrame(word_dict)
+                sub_df = pd.DataFrame(word_dict,index=word_dict["word"])
                 df = pd.concat([df,sub_df])
-        d = df['word'].value_counts().head(30).index.tolist()
-        self.comment_word = d
-        
-    # 選択した単語ベクトル化
-    def word_vector_create(self,wd2vc_file_path="word2vec/word2vec_model/tablog_Skip-gram.model"):
-        wd2vc_model = word2vec.Word2Vec.load(wd2vc_file_path)
-        for word in self.comment_word:
-            try:
-                self.comment_word_vector[word] = wd2vc_model.wv.get_vector(word)
-            except:
-                continue
-            if len(list(self.comment_word_vector.keys())) == 10:
-                break
-        self.shop_data["word"] = list(self.comment_word_vector.keys())
-        self.shop_data["comment_word_vector"] = {k:v.tolist() for k,v in self.comment_word_vector.items()}
+        comment_word = df['word'].value_counts().head(10).index.to_list()
+        self.shop_data["word"] = {w:df.loc[w].values.tolist()[-1] for w in comment_word}
+        return comment_word
 
     # ジャンルのid決定
     def id_select(self):
@@ -128,48 +111,33 @@ class Shop:
             return genre
 
     # 店ベクトル作成
-    def vector_concat(self):
-        genre_vector = np.full((1,200),self.genre_id*0.1)
-        review_vector = np.full((1,200),self.review/5*0.1)
-        word_vector = np.array([vec for vec in self.comment_word_vector.values()])
-        self.shop_vector = np.concatenate([genre_vector,review_vector,word_vector])
-        if len(self.shop_vector) != 2400:
-            self.shop_vector = np.concatenate([self.shop_vector,np.zeros((10-len(self.comment_word),200))])
-        self.shop_data["shop_vector"] = self.shop_vector.tolist()
+    def vector_concat(self,vector_size=100):
+        genre_vector = np.full((1,vector_size),self.genre_id*0.1)
+        review_vector = np.full((1,vector_size),self.review/5*0.5)
+        word_vector = np.array([ self.wd2vc_model.wv[word] for word in self.shop_data["word"].keys()])
+        shop_vector = np.concatenate([genre_vector,review_vector,word_vector])
+        if len(list(self.shop_data["word"].keys())) < 10:
+            shop_vector = np.concatenate([shop_vector,np.zeros((10-len(list(self.shop_data["word"].keys())),100))])
+        return shop_vector
 
-    # とりあえず置いてる
-    def save_json(self,file_name,select_op=True,genre_op=True,vector=True):
+    # 保存形式
+    def save_json(self,file_name=None,file_op=True):
         self.shop_text_clean()  
-        if select_op:
-            self.word_select()
-            if self.comment_word == []:
-                return 
-            self.word_vector_create()
-        if genre_op:
-            self.id_select()
-        if vector:
-            self.word_vector_create()
-            self.vector_concat()        
-        file_create(self.shop_data,file_name)
-
-
+        self.word_select()
+        self.id_select()    
+        self.shop_data.pop("口コミ")
+        if file_op:
+            file_create(self.shop_data,file_name)
+        return self.shop_data
 
 
 if __name__=="__main__":
-    import torch
-    test = Shop(shop_file_path="tablog_data/'99 BABY's CAFE.json")
-    test.word_select()
-    print(test.comment_word)
-    # test.word_vector_create()
-    # test.id_select()
-    # test.vector_concat()
-    # print(test.shop_data["shop_vector"])
-    # print(type(test.shop_data["comment_word_vector"]["精算"]))
-    # print(test.shop_data["comment_word_vector"]["精算"])
-    # file_create(test.shop_data["comment_word_vector"],"a.json")
-    # print(type(test.shop_data))
+    test = Shop(shop_file_path="tablog_data\\100時間カレー ゆめタウン高松店.json")
     test.save_json("a.json")
-    test2 = Shop(shop_file_path="a.json")
-    print(torch.from_numpy(np.ravel(test2.shop_vector)))
-    print(type(np.ravel(test2.shop_vector)))
+    print(list(test.shop_data["word"].keys()))
+    data = test.vector_concat()
+    # test2 = Shop(shop_file_path="a.json")
+    # print(torch.from_numpy(np.ravel(test2.shop_vector)))
+    # print(type(np.ravel(test2.shop_vector)))
+    # print(test.shop_data["店名"])
     # print(test2.comment_word_vector)

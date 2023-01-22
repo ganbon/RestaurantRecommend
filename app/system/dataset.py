@@ -7,7 +7,7 @@ from torch_geometric.utils import train_test_split_edges
 from torch_geometric.data import Data
 import sys
 sys.path.append("..")
-from shop import Shop
+from system.shop import Shop
 
 
 class ShopGraphDataset:
@@ -18,7 +18,7 @@ class ShopGraphDataset:
         embeding = Embedding(len(self.user_name),vector_size)
         self.shop_name = [shop.shop_data["店名"] for shop in shop_data_list] 
         user_x = embeding(torch.tensor([i for i in range(len(self.user_name))]))
-        shop_x = torch.stack([torch.from_numpy(np.ravel(shop.shop_vector))  for shop in shop_data_list])
+        shop_x = torch.stack([torch.from_numpy(np.ravel(shop.vector_concat()))  for shop in shop_data_list])
         self.x = torch.cat([user_x,shop_x])
         self.edge_index = None
     
