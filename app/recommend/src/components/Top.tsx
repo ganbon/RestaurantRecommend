@@ -5,7 +5,7 @@ import Header from "./Header"
 const Top = () =>{
     return (
       <div>
-        <Header title={"グルメコンサルティング"}/>
+        <Header title={"グルメコンサル"}/>
       </div>
     );
 }

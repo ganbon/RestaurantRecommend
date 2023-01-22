@@ -16,7 +16,7 @@ const Header = (props:TitleProps) =>{
         <Button href="/" color="inherit">トップ</Button>
         <Button href="/search" color="inherit">検索</Button>
         <Button href="/new" color="inherit">あなたへのおすすめ</Button>
-        <Button href="/popular" color="inherit">人気のお店</Button>
+        <Button href="/history" color="inherit">履歴</Button>
         </Toolbar>
       </AppBar>
     );

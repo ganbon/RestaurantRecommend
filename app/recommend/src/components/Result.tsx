@@ -19,7 +19,7 @@ type ResultsPropsType = {
 const Result = (props:ResultsPropsType) => {
     return (
         <Card sx={{ maxWidth: 345 ,m:3}}>
-        <CardActionArea href={props.url}>
+        <CardActionArea href={props.url} target="_blank">
           <CardMedia
             component="img"
             height="140"

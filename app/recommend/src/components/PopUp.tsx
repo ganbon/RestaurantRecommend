@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import SubTitle from "./SubTitle"
 import { Rating,Dialog,Button } from '@mui/material';
 import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -27,7 +26,7 @@ const PopUp = (props:any) => {
     </Button>
     <Dialog onClose={handleClose} open={open}>
       <DialogTitle sx={{ m: 0, p: 2 }}>レビュー</DialogTitle>
-    
+    <p>ランチ</p>
       <Rating
           name="half-rating"
           defaultValue={0}
@@ -37,7 +36,7 @@ const PopUp = (props:any) => {
           setLunchValue(newlunchValue);
           }}
       />
-
+      <p>ディナー</p>
       <Rating
           name="half-rating"
           value={dinnervalue}
