@@ -26,7 +26,7 @@
 - Word2vec
 - Variational Graph Auto-Encoders (VGAE)
 
->**note**
+>**Note**  
 >自作ライブラリとして`nlptoolsjp`を使用しています  
 >詳しくは[こちら](https://github.com/ganbon/NLPtools-Library)をご覧ください。
 
