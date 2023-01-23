@@ -2,24 +2,26 @@ from dataset import ShopGraphDataset
 from gnn import VariationalGCNEncoder
 from torch_geometric.nn import VGAE
 import torch
-import numpy as np
-from torch.nn import L1Loss
 from torch_geometric.utils import train_test_split_edges
 from torch.optim import AdamW
 from nlptoolsjp.file_system import *
-from tqdm import tqdm
 import time
+from datetime import datetime
+from gensim.models import word2vec
 import sys
 sys.path.append("..")
 from shop import Shop
 
+
+print(datetime.now())
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 user_lunch_data = file_load("../csv_data/user/user_lunch_data.csv")
 user_dinner_data = file_load("../csv_data/user/user_dinner_data.csv")
-shop_data = file_load("../shop_data_v2.json")
-shop_data_list = [Shop(shop_data=shop) for name,shop in shop_data.items()]
-epoch = 100
-dataset_module = ShopGraphDataset(user_data = user_dinner_data,shop_data_list = shop_data_list,date="夜")
+wd2vec_model= word2vec.Word2Vec.load("../word2vec\word2vec_model/food_Skip-gram100-5.model")
+shop_data = file_load("../shop_data_v4.json")
+shop_data_list = [Shop(shop_data=shop,wd2vc_model=wd2vec_model) for name,shop in shop_data.items()]
+epoch = 50
+dataset_module = ShopGraphDataset(user_data = user_dinner_data,shop_data_list = shop_data_list,date="夜",vector_size=1200)
 dataset = dataset_module.load_dataset()
 print(dataset)
 split_dataset = train_test_split_edges(dataset)
@@ -29,15 +31,10 @@ train_data_edge_attr = split_dataset.train_pos_edge_attr.double().to(device)
 test_pos_edge_index = split_dataset.test_pos_edge_index.long().to(device)
 test_neg_edge_index = split_dataset.test_neg_edge_index.long().to(device)
 test_pos_edge_attr = split_dataset.test_pos_edge_attr.double().to(device)
-# print(edge_feature.dtype,train_data_edge_index.dtype,train_data_edge_attr.dtype,test_pos_edge_index.dtype,test_neg_edge_index.dtype,test_pos_edge_attr.dtype)
-# exit(1)
-input_size = 2400
+input_size = 1200
 output_size = 32
-# model1 = UserVectorGNN(input_size=input_size,output_size=output_size)
-# model = model1
 model2 = VGAE(VariationalGCNEncoder(input_size=input_size,output_size=output_size))
 model = model2.double().to(device)
-# loss_function = L1Loss()
 optimizer = AdamW(model.parameters(), lr=0.001)
 for e in range(1,epoch+1):
     model.train()
@@ -54,4 +51,4 @@ for e in range(1,epoch+1):
         auc,ap = model.test(z,test_pos_edge_index,test_neg_edge_index)
         print(f"epoch:{e} AUC:{auc} AP:{ap} loss:{loss}")
     time.sleep(2)
-torch.save(model,'dinner_vgae.pth')
+torch.save(model,'model/dinner_vgae_v2.pth')
