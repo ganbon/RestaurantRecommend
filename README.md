@@ -14,7 +14,6 @@
 - anaconda-4.12.0
 - React
 - Material UI
-## 
 ## システム構成図
 ### 全体
 ![全体](fig/全体構成.png)
@@ -26,6 +25,10 @@
 - スクレイピング
 - Word2vec
 - Variational Graph Auto-Encoders (VGAE)
+
+**note**
+自作ライブラリとして`nlptoolsjp`を使用しています  
+詳しくは[こちら](https://github.com/ganbon/NLPtools-Library)をご覧ください。
 
 ## Author
 [Twitter](https://twitter.com/g75hca)
