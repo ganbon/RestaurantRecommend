@@ -29,6 +29,3 @@
 >**Note**  
 >自作ライブラリとして`nlptoolsjp`を使用しています  
 >詳しくは[こちら](https://github.com/ganbon/NLPtools-Library)をご覧ください。
-
-## Author
-[Twitter](https://twitter.com/g75hca)
